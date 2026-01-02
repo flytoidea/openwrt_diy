@@ -47,7 +47,7 @@ PACKAGE_OPENWRT=(
 PACKAGE_OPENWRT_RK3588=("ak88" "e52c" "e54c" "h88k" "h88k-v3" "rock5b" "rock5c")
 # Set the list of devices using the [ rk35xx ] kernel
 PACKAGE_OPENWRT_RK35XX=(
-    "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h69k" "h69k-max" "ht2"
+    "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h68k-tv" "h69k" "h69k-max" "ht2"
     "jp-tvbox" "watermelon-pi" "yixun-rs6pro" "zcube1-max"
 )
 # Set the list of devices using the [ 6.x.y ] kernel
@@ -603,6 +603,7 @@ EOF
                         h28k)               [[ -f "${SCRIPT_H28K}" ]]            && sudo ./${SCRIPT_H28K} ;;
                         h66k)               [[ -f "${SCRIPT_H66K}" ]]            && sudo ./${SCRIPT_H66K} ;;
                         h68k)               [[ -f "${SCRIPT_H68K}" ]]            && sudo ./${SCRIPT_H68K} ;;
+                        h68k-tv)            [[ -f "${SCRIPT_H68K-TV}" ]]         && sudo ./${SCRIPT_H68K-TV} ;;
                         h69k)               [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} ;;
                         h69k-max)           [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} "max" ;;
                         h88k)               [[ -f "${SCRIPT_H88K}" ]]            && sudo ./${SCRIPT_H88K} "25" ;;
