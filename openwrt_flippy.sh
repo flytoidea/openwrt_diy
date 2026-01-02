@@ -84,7 +84,7 @@ SCRIPT_E54C_FILE="mk_rk3588s_e54c.sh"
 SCRIPT_H28K_FILE="mk_rk3528_h28k.sh"
 SCRIPT_H66K_FILE="mk_rk3568_h66k.sh"
 SCRIPT_H68K_FILE="mk_rk3568_h68k.sh"
-SCRIPT_H68K_FILE="mk_rk3568_h68k-tv.sh"
+SCRIPT_H68KTV_FILE="mk_rk3568_h68k-tv.sh"
 SCRIPT_H69K_FILE="mk_rk3568_h69k.sh"
 SCRIPT_H88K_FILE="mk_rk3588_h88k.sh"
 SCRIPT_H88KV3_FILE="mk_rk3588_h88k-v3.sh"
@@ -180,7 +180,7 @@ init_var() {
     SCRIPT_H28K="${SCRIPT_H28K:-${SCRIPT_H28K_FILE}}"
     SCRIPT_H66K="${SCRIPT_H66K:-${SCRIPT_H66K_FILE}}"
     SCRIPT_H68K="${SCRIPT_H68K:-${SCRIPT_H68K_FILE}}"
-    SCRIPT_H68K-TV="${SCRIPT_H68K-TV:-${SCRIPT_H68K-TV_FILE}}"
+    SCRIPT_H68KTV="${SCRIPT_H68KTV:-${SCRIPT_H68KTV_FILE}}"
     SCRIPT_H69K="${SCRIPT_H69K:-${SCRIPT_H69K_FILE}}"
     SCRIPT_H88K="${SCRIPT_H88K:-${SCRIPT_H88K_FILE}}"
     SCRIPT_H88KV3="${SCRIPT_H88KV3:-${SCRIPT_H88KV3_FILE}}"
@@ -603,7 +603,7 @@ EOF
                         h28k)               [[ -f "${SCRIPT_H28K}" ]]            && sudo ./${SCRIPT_H28K} ;;
                         h66k)               [[ -f "${SCRIPT_H66K}" ]]            && sudo ./${SCRIPT_H66K} ;;
                         h68k)               [[ -f "${SCRIPT_H68K}" ]]            && sudo ./${SCRIPT_H68K} ;;
-                        h68k-tv)            [[ -f "${SCRIPT_H68K-TV}" ]]         && sudo ./${SCRIPT_H68K-TV} ;;
+                        h68k-tv)            [[ -f "${SCRIPT_H68KTV}" ]]          && sudo ./${SCRIPT_H68KTV} ;;
                         h69k)               [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} ;;
                         h69k-max)           [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} "max" ;;
                         h88k)               [[ -f "${SCRIPT_H88K}" ]]            && sudo ./${SCRIPT_H88K} "25" ;;
