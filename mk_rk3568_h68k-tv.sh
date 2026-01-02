@@ -135,26 +135,30 @@ btrfs subvolume create $TGT_ROOT/etc
 extract_rootfs_files
 extract_rockchip_boot_files
 
-# 复制h68k-tv专用设备树文件到引导分区
+# ========= 添加以下代码段 =========
 echo "复制h68k-tv专用设备树文件到引导分区..."
 if [ -f "${PWD}/files/rk3568/h68k-tv/rk3568-hlink-h68k-tv.dtb" ]; then
     cp "${PWD}/files/rk3568/h68k-tv/rk3568-hlink-h68k-tv.dtb" "${TGT_BOOT}/dtb/rockchip/"
     echo "已复制设备树文件到 ${TGT_BOOT}/dtb/rockchip/rk3568-hlink-h68k-tv.dtb"
 else
-    echo "警告：未找到 h68k-tv 专用设备树文件！"
+    echo "错误：未找到 h68k-tv 专用设备树文件！"
     echo "请确保文件位于：${PWD}/files/rk3568/h68k-tv/rk3568-hlink-h68k-tv.dtb"
+    echo "构建将使用默认设备树，可能导致TV版功能不正常！"
 fi
+# ========= 结束添加 =========
 
 echo "修改引导分区相关配置 ... "
 cd $TGT_BOOT
-# 删除原有相关配置行
-sed -e '/fdtfile=/d' -i armbianEnv.txt  # 新增：删除旧的设备树设置
-sed -e '/rootdev=/d' -i armbianEnv.txt
-sed -e '/rootfstype=/d' -i armbianEnv.txt
-sed -e '/rootflags=/d' -i armbianEnv.txt
+
+# 删除原有的关键配置行
+sed -e '/^fdtfile=/d' -i armbianEnv.txt      # 删除设备树设置
+sed -e '/^rootdev=/d' -i armbianEnv.txt      # 删除根设备设置
+sed -e '/^rootfstype=/d' -i armbianEnv.txt   # 删除文件系统类型
+sed -e '/^rootflags=/d' -i armbianEnv.txt    # 删除挂载选项
+
 # 添加新的配置
 cat >> armbianEnv.txt <<EOF
-fdtfile=rockchip/rk3568-hlink-h68k-tv.dtb  # 新增：指定设备树文件路径
+fdtfile=rockchip/rk3568-hlink-h68k-tv.dtb
 rootdev=UUID=${ROOTFS_UUID}
 rootfstype=btrfs
 rootflags=compress=zstd:${ZSTD_LEVEL}
@@ -195,5 +199,6 @@ mv ${TGT_IMG} ${OUTPUT_DIR} && sync
 echo "镜像已生成! 存放在 ${OUTPUT_DIR} 下面!"
 echo "========================== end $0 ================================"
 echo
+
 
 
