@@ -135,6 +135,19 @@ btrfs subvolume create $TGT_ROOT/etc
 extract_rootfs_files
 extract_rockchip_boot_files
 
+# 复制h68k-tv专用设备树文件到引导分区
+echo "复制h68k-tv专用设备树文件到引导分区..."
+if [ -f "${PWD}/files/rk3568/h68k-tv/rk3568-hlink-h68k-tv.dtb" ]; then
+    cp "${PWD}/files/rk3568/h68k-tv/rk3568-hlink-h68k-tv.dtb" "${TGT_BOOT}/dtb/rockchip/"
+    echo "已复制设备树文件到 ${TGT_BOOT}/dtb/rockchip/rk3568-hlink-h68k-tv.dtb"
+else
+    echo "警告：未找到 h68k-tv 专用设备树文件！"
+    echo "请确保文件位于：${PWD}/files/rk3568/h68k-tv/rk3568-hlink-h68k-tv.dtb"
+fi
+
+echo "修改引导分区相关配置 ... "
+
+
 echo "修改引导分区相关配置 ... "
 cd $TGT_BOOT
 sed -e '/rootdev=/d' -i armbianEnv.txt
@@ -181,3 +194,4 @@ mv ${TGT_IMG} ${OUTPUT_DIR} && sync
 echo "镜像已生成! 存放在 ${OUTPUT_DIR} 下面!"
 echo "========================== end $0 ================================"
 echo
+
