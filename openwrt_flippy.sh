@@ -616,7 +616,29 @@ EOF
                         h28k)               [[ -f "${SCRIPT_H28K}" ]]            && sudo ./${SCRIPT_H28K} ;;
                         h66k)               [[ -f "${SCRIPT_H66K}" ]]            && sudo ./${SCRIPT_H66K} ;;
                         h68k)               [[ -f "${SCRIPT_H68K}" ]]            && sudo ./${SCRIPT_H68K} ;;
-                        h68k-tv)            [[ -f "${SCRIPT_H68KTV}" ]]          && sudo ./${SCRIPT_H68KTV} ;;
+
+
+
+
+
+
+                        
+                       # h68k-tv)            [[ -f "${SCRIPT_H68KTV}" ]]          && sudo ./${SCRIPT_H68KTV} ;;
+                       h68k-tv)
+    echo -e "${INFO} [DEBUG] Workdir files list (mk_rk3568*):"
+    ls -la /opt/openwrt_packit | grep mk_rk3568
+    echo -e "${INFO} [DEBUG] SCRIPT_H68KTV variable value: ${SCRIPT_H68KTV}"
+    echo -e "${INFO} [DEBUG] Check if script exists: $(if [[ -f "/opt/openwrt_packit/${SCRIPT_H68KTV}" ]]; then echo "YES"; else echo "NO"; fi)"
+    # 强制赋予执行权限
+    chmod +x /opt/openwrt_packit/${SCRIPT_H68KTV} 2>/dev/null
+    [[ -f "${SCRIPT_H68KTV}" ]] && sudo ./${SCRIPT_H68KTV} ;;
+
+
+
+
+
+
+                        
                         h69k)               [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} ;;
                         h69k-max)           [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} "max" ;;
                         h88k)               [[ -f "${SCRIPT_H88K}" ]]            && sudo ./${SCRIPT_H88K} "25" ;;
