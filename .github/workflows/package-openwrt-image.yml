@@ -225,7 +225,7 @@ jobs:
           echo "status=success" >> ${GITHUB_OUTPUT}
 
       - name: Package OpenWrt Firmware
-        run: |
+        uses: flytoidea/openwrt_dtb_diy@mast
         if: ${{ steps.download.outputs.status }} == 'success' && !cancelled()
         env:
           OPENWRT_ARMSR: download/*rootfs.tar.gz
