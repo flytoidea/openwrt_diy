@@ -1,5 +1,5 @@
 #!/bin/sh
-# /etc/board.d/00-board-name for h68k-tv
+# /etc/board.d/00-board-name for h68ktv
 # Copyright (C) 2015 OpenWrt.org
 # Copyright (C) 2016 Yousong Zhou <yszhou4tech@gmail.com>
 
@@ -7,8 +7,8 @@
 
 board_config_update
 
-ucidef_set_board_id "hlink,h68k-tv"
-ucidef_set_model_name "Hlink H68K TV"
+ucidef_set_board_id "hlink,h68ktv"
+ucidef_set_model_name "Hlink H68KTV"
 # 可选：添加硬件版本
 # ucidef_set_hardware_version "1.0"
 
