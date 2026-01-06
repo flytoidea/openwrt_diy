@@ -14,7 +14,7 @@ SFE_FLOW=1
 
 PLATFORM=rockchip
 SOC=rk3568
-BOARD=h68k-tv
+BOARD=h68ktv
 SUBVER=$1
 
 # Kernel image sources
@@ -72,7 +72,7 @@ SYSFIXTIME_PATCH="${PWD}/files/sysfixtime.patch"
 SSL_CNF_PATCH="${PWD}/files/openssl_engine.patch"
 
 # 20201212 add
-BAL_CONFIG="${PWD}/files/rk3568/h68k-tv/balance_irq"
+BAL_CONFIG="${PWD}/files/rk3568/h68ktv/balance_irq"
 
 # 20210307 add
 SS_LIB="${PWD}/files/ss-glibc/lib-glibc.tar.xz"
@@ -84,10 +84,10 @@ DOCKERD_PATCH="${PWD}/files/dockerd.patch"
 
 # 20200416 add
 FIRMWARE_TXZ="${PWD}/files/firmware_armbian.tar.xz"
-BOOTFILES_HOME="${PWD}/files/bootfiles/rockchip/rk3568/h68k-tv"
+BOOTFILES_HOME="${PWD}/files/bootfiles/rockchip/rk3568/h68ktv"
 GET_RANDOM_MAC="${PWD}/files/get_random_mac.sh"
-BOOTLOADER_IMG="${PWD}/files/rk3568/h68k-tv/bootloader.bin"
-UPDATE_H68KTV_SCRIPT="${PWD}/files/update-h68k-tv-openwrt.sh"
+BOOTLOADER_IMG="${PWD}/files/rk3568/h68ktv/bootloader.bin"
+
 # 20210618 add
 DOCKER_README="${PWD}/files/DockerReadme.pdf"
 
@@ -107,13 +107,15 @@ DDBR="${PWD}/files/openwrt-ddbr"
 SSH_CIPHERS="aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr,chacha20-poly1305@openssh.com"
 SSHD_CIPHERS="aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr"
 # 20220927 add
-BOARD_HOME="${PWD}/files/rk3568/h68k-tv/board.d"
+BOARD_HOME="${PWD}/files/rk3568/h68ktv/board.d"
 # 20221001 add
 MODULES_HOME="${PWD}/files/rk3568/modules.d"
 # 20221123 add
-BOARD_MODULES_HOME="${PWD}/files/rk3568/h68k-tv/modules.d"
+BOARD_MODULES_HOME="${PWD}/files/rk3568/h68ktv/modules.d"
 # 20221013 add
-WIRELESS_CONFIG="${PWD}/files/rk3568/h68k-tv/wireless"
+WIRELESS_CONFIG="${PWD}/files/rk3568/h68ktv/wireless"
+# 20230622 add
+NETWORK_SERVICE_PATCH="${PWD}/files/rk3568/h68ktv/network.patch"
 
 # 20230921 add
 #DC_VOLTAGE_PATCH="${PWD}/files/rk3568/h69k/dc_voltage.patch"
@@ -135,30 +137,12 @@ btrfs subvolume create $TGT_ROOT/etc
 extract_rootfs_files
 extract_rockchip_boot_files
 
-# ========= 添加以下代码段 =========
-echo "复制h68k-tv专用设备树文件到引导分区..."
-if [ -f "${PWD}/files/rk3568/h68k-tv/rk3568-hlink-h68k-tv.dtb" ]; then
-    cp "${PWD}/files/rk3568/h68k-tv/rk3568-hlink-h68k-tv.dtb" "${TGT_BOOT}/dtb/rockchip/"
-    echo "已复制设备树文件到 ${TGT_BOOT}/dtb/rockchip/rk3568-hlink-h68k-tv.dtb"
-else
-    echo "错误：未找到 h68k-tv 专用设备树文件！"
-    echo "请确保文件位于：${PWD}/files/rk3568/h68k-tv/rk3568-hlink-h68k-tv.dtb"
-    echo "构建将使用默认设备树，可能导致TV版功能不正常！"
-fi
-# ========= 结束添加 =========
-
 echo "修改引导分区相关配置 ... "
 cd $TGT_BOOT
-
-# 删除原有的关键配置行
-sed -e '/^fdtfile=/d' -i armbianEnv.txt      # 删除设备树设置
-sed -e '/^rootdev=/d' -i armbianEnv.txt      # 删除根设备设置
-sed -e '/^rootfstype=/d' -i armbianEnv.txt   # 删除文件系统类型
-sed -e '/^rootflags=/d' -i armbianEnv.txt    # 删除挂载选项
-
-# 添加新的配置
+sed -e '/rootdev=/d' -i armbianEnv.txt
+sed -e '/rootfstype=/d' -i armbianEnv.txt
+sed -e '/rootflags=/d' -i armbianEnv.txt
 cat >> armbianEnv.txt <<EOF
-fdtfile=rockchip/rk3568-hlink-h68k-tv.dtb
 rootdev=UUID=${ROOTFS_UUID}
 rootfstype=btrfs
 rootflags=compress=zstd:${ZSTD_LEVEL}
@@ -172,15 +156,6 @@ echo
 echo "修改根文件系统相关配置 ... "
 cd $TGT_ROOT
 copy_supplement_files
-echo "复制 h68k-tv 更新脚本..."
-if [ -f "$UPDATE_H68KTV_SCRIPT" ]; then
-    install -m 0755 "$UPDATE_H68KTV_SCRIPT" "$TGT_ROOT/usr/bin/"
-    echo "✓ 已安装 h68k-tv 更新脚本到 /usr/bin/"
-else
-    echo "⚠ 警告: h68k-tv 更新脚本未找到"
-    echo "  路径: $UPDATE_H68KTV_SCRIPT"
-fi
-
 extract_glibc_programs
 adjust_docker_config
 adjust_openssl_config
