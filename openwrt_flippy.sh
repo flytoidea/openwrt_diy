@@ -21,7 +21,7 @@
 #=============================== Set make environment variables ===============================
 #
 # Set the default package source download repository
-SCRIPT_REPO_URL_VALUE="https://github.com/flytoidea/openwrt_diy"
+SCRIPT_REPO_URL_VALUE="https://github.com/unifreq/openwrt_packit"
 SCRIPT_REPO_BRANCH_VALUE="master"
 # Set the *rootfs.tar.gz package save name
 PACKAGE_FILE="openwrt-armsr-armv8-generic-rootfs.tar.gz"
@@ -34,7 +34,7 @@ SAVE_OPENWRT_ROOTFS_VALUE="true"
 # Set the list of supported device
 PACKAGE_OPENWRT=(
     "ak88" "e52c" "e54c" "h88k" "h88k-v3" "rock5b" "rock5c"
-    "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h68k-tv" "h69k" "h69k-max" "ht2"
+    "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h69k" "h69k-max" "ht2"
     "jp-tvbox" "watermelon-pi" "yixun-rs6pro" "zcube1-max"
     "cm3" "e25" "photonicat" "r66s" "r68s" "rk3399"
     "s922x" "s922x-n2" "s905x3" "s905x2" "s912" "s905d" "s905"
@@ -47,7 +47,7 @@ PACKAGE_OPENWRT=(
 PACKAGE_OPENWRT_RK3588=("ak88" "e52c" "e54c" "h88k" "h88k-v3" "rock5b" "rock5c")
 # Set the list of devices using the [ rk35xx ] kernel
 PACKAGE_OPENWRT_RK35XX=(
-    "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h68k-tv" "h69k" "h69k-max" "ht2"
+    "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h69k" "h69k-max" "ht2"
     "jp-tvbox" "watermelon-pi" "yixun-rs6pro" "zcube1-max"
 )
 # Set the list of devices using the [ 6.x.y ] kernel
@@ -84,7 +84,6 @@ SCRIPT_E54C_FILE="mk_rk3588s_e54c.sh"
 SCRIPT_H28K_FILE="mk_rk3528_h28k.sh"
 SCRIPT_H66K_FILE="mk_rk3568_h66k.sh"
 SCRIPT_H68K_FILE="mk_rk3568_h68k.sh"
-SCRIPT_H68KTV_FILE="mk_rk3568_h68k-tv.sh"
 SCRIPT_H69K_FILE="mk_rk3568_h69k.sh"
 SCRIPT_H88K_FILE="mk_rk3588_h88k.sh"
 SCRIPT_H88KV3_FILE="mk_rk3588_h88k-v3.sh"
@@ -180,7 +179,6 @@ init_var() {
     SCRIPT_H28K="${SCRIPT_H28K:-${SCRIPT_H28K_FILE}}"
     SCRIPT_H66K="${SCRIPT_H66K:-${SCRIPT_H66K_FILE}}"
     SCRIPT_H68K="${SCRIPT_H68K:-${SCRIPT_H68K_FILE}}"
-    SCRIPT_H68KTV="${SCRIPT_H68KTV:-${SCRIPT_H68KTV_FILE}}"
     SCRIPT_H69K="${SCRIPT_H69K:-${SCRIPT_H69K_FILE}}"
     SCRIPT_H88K="${SCRIPT_H88K:-${SCRIPT_H88K_FILE}}"
     SCRIPT_H88KV3="${SCRIPT_H88KV3:-${SCRIPT_H88KV3_FILE}}"
@@ -361,19 +359,6 @@ init_packit_repo() {
         fi
         chmod +x ${SELECT_PACKITPATH}/${SCRIPT_DIY}
         echo -e "List of [ ${SELECT_PACKITPATH} ] directory files:\n $(ls -lh ${SELECT_PACKITPATH})"
-        
-         echo -e "${STEPS} Auto sync all mk_*.sh scripts to workdir..."
-    for script_file in ${GITHUB_WORKSPACE}/mk_*.sh; do
-        if [[ -f "${script_file}" ]]; then
-            script_name=$(basename "${script_file}")
-            cp -vf "${script_file}" "/opt/${SELECT_PACKITPATH}/${script_name}"
-            chmod +x "/opt/${SELECT_PACKITPATH}/${script_name}"
-            echo -e "${INFO} Synced: [ ${script_name} ]"
-        fi
-    done
-
-
-        
     }
 }
 
@@ -616,29 +601,6 @@ EOF
                         h28k)               [[ -f "${SCRIPT_H28K}" ]]            && sudo ./${SCRIPT_H28K} ;;
                         h66k)               [[ -f "${SCRIPT_H66K}" ]]            && sudo ./${SCRIPT_H66K} ;;
                         h68k)               [[ -f "${SCRIPT_H68K}" ]]            && sudo ./${SCRIPT_H68K} ;;
-
-
-
-
-
-
-                        
-                       # h68k-tv)            [[ -f "${SCRIPT_H68KTV}" ]]          && sudo ./${SCRIPT_H68KTV} ;;
-                       h68k-tv)
-    echo -e "${INFO} [DEBUG] Workdir files list (mk_rk3568*):"
-    ls -la /opt/openwrt_packit | grep mk_rk3568
-    echo -e "${INFO} [DEBUG] SCRIPT_H68KTV variable value: ${SCRIPT_H68KTV}"
-    echo -e "${INFO} [DEBUG] Check if script exists: $(if [[ -f "/opt/openwrt_packit/${SCRIPT_H68KTV}" ]]; then echo "YES"; else echo "NO"; fi)"
-    # 强制赋予执行权限
-    chmod +x /opt/openwrt_packit/${SCRIPT_H68KTV} 2>/dev/null
-    [[ -f "${SCRIPT_H68KTV}" ]] && sudo ./${SCRIPT_H68KTV} ;;
-
-
-
-
-
-
-                        
                         h69k)               [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} ;;
                         h69k-max)           [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} "max" ;;
                         h88k)               [[ -f "${SCRIPT_H88K}" ]]            && sudo ./${SCRIPT_H88K} "25" ;;
