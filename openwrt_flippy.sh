@@ -34,7 +34,7 @@ SAVE_OPENWRT_ROOTFS_VALUE="true"
 # Set the list of supported device
 PACKAGE_OPENWRT=(
     "ak88" "e52c" "e54c" "h88k" "h88k-v3" "rock5b" "rock5c"
-    "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h69k" "h69k-max" "ht2"
+    "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h68ktv" "h69k" "h69k-max" "ht2"
     "jp-tvbox" "watermelon-pi" "yixun-rs6pro" "zcube1-max"
     "cm3" "e25" "photonicat" "r66s" "r68s" "rk3399"
     "s922x" "s922x-n2" "s905x3" "s905x2" "s912" "s905d" "s905"
@@ -47,7 +47,7 @@ PACKAGE_OPENWRT=(
 PACKAGE_OPENWRT_RK3588=("ak88" "e52c" "e54c" "h88k" "h88k-v3" "rock5b" "rock5c")
 # Set the list of devices using the [ rk35xx ] kernel
 PACKAGE_OPENWRT_RK35XX=(
-    "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h69k" "h69k-max" "ht2"
+    "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h68ktv" "h69k" "h69k-max" "ht2"
     "jp-tvbox" "watermelon-pi" "yixun-rs6pro" "zcube1-max"
 )
 # Set the list of devices using the [ 6.x.y ] kernel
@@ -84,6 +84,7 @@ SCRIPT_E54C_FILE="mk_rk3588s_e54c.sh"
 SCRIPT_H28K_FILE="mk_rk3528_h28k.sh"
 SCRIPT_H66K_FILE="mk_rk3568_h66k.sh"
 SCRIPT_H68K_FILE="mk_rk3568_h68k.sh"
+SCRIPT_H68KTV_FILE="mk_rk3568_h68ktv.sh"
 SCRIPT_H69K_FILE="mk_rk3568_h69k.sh"
 SCRIPT_H88K_FILE="mk_rk3588_h88k.sh"
 SCRIPT_H88KV3_FILE="mk_rk3588_h88k-v3.sh"
@@ -179,6 +180,7 @@ init_var() {
     SCRIPT_H28K="${SCRIPT_H28K:-${SCRIPT_H28K_FILE}}"
     SCRIPT_H66K="${SCRIPT_H66K:-${SCRIPT_H66K_FILE}}"
     SCRIPT_H68K="${SCRIPT_H68K:-${SCRIPT_H68K_FILE}}"
+    SCRIPT_H68KTV="${SCRIPT_H68KTV:-${SCRIPT_H68KTV_FILE}}"
     SCRIPT_H69K="${SCRIPT_H69K:-${SCRIPT_H69K_FILE}}"
     SCRIPT_H88K="${SCRIPT_H88K:-${SCRIPT_H88K_FILE}}"
     SCRIPT_H88KV3="${SCRIPT_H88KV3:-${SCRIPT_H88KV3_FILE}}"
@@ -601,6 +603,7 @@ EOF
                         h28k)               [[ -f "${SCRIPT_H28K}" ]]            && sudo ./${SCRIPT_H28K} ;;
                         h66k)               [[ -f "${SCRIPT_H66K}" ]]            && sudo ./${SCRIPT_H66K} ;;
                         h68k)               [[ -f "${SCRIPT_H68K}" ]]            && sudo ./${SCRIPT_H68K} ;;
+                        h68ktv)             [[ -f "${SCRIPT_H68KTV}" ]]          && sudo ./${SCRIPT_H68KTV} ;;
                         h69k)               [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} ;;
                         h69k-max)           [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} "max" ;;
                         h88k)               [[ -f "${SCRIPT_H88K}" ]]            && sudo ./${SCRIPT_H88K} "25" ;;
