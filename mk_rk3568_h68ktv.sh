@@ -137,6 +137,11 @@ btrfs subvolume create $TGT_ROOT/etc
 extract_rootfs_files
 extract_rockchip_boot_files
 
+# 直接复制到 dtb/rockchip 目录
+echo "复制自定义设备树文件到引导分区..."
+mkdir -p ${TGT_BOOT}/dtb/rockchip
+cp -f ${PWD}/files/rk3568/h68ktv/*.dtb ${TGT_BOOT}/dtb/rockchip/ 2>/dev/null || true
+
 echo "修改引导分区相关配置 ... "
 cd $TGT_BOOT
 sed -e '/rootdev=/d' -i armbianEnv.txt
