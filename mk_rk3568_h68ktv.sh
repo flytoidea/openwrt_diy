@@ -137,23 +137,10 @@ btrfs subvolume create $TGT_ROOT/etc
 extract_rootfs_files
 extract_rockchip_boot_files
 
-
-# 调试：检查引导分区内容
-echo "===== 调试：引导分区内容 ====="
-ls -la ${TGT_BOOT}/
-echo "armbianEnv.txt 内容:"
-cat ${TGT_BOOT}/armbianEnv.txt 2>/dev/null || echo "armbianEnv.txt不存在"
-echo "dtb文件:"
-find ${TGT_BOOT}/dtb -name "*.dtb" 2>/dev/null | sort
-echo "============================"
-
-# 检查镜像生成过程
-echo "===== 调试：镜像状态 ====="
-ls -lh ${TGT_IMG} 2>/dev/null || echo "镜像文件尚未生成"
-echo "磁盘使用:"
-df -h .
-echo "=========================="
-
+# 复制设备树文件
+mkdir -p ${TGT_BOOT}/dtb/rockchip
+cp -f "${PWD}/files/bootfiles/rockchip/rk3568/h68ktv/rk3568-hlink-h68ktv.dtb" \
+      "${TGT_BOOT}/dtb/rockchip/" 2>/dev/null || true
 
 echo "修改引导分区相关配置 ... "
 cd $TGT_BOOT
