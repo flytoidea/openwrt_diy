@@ -603,7 +603,8 @@ EOF
                         h28k)               [[ -f "${SCRIPT_H28K}" ]]            && sudo ./${SCRIPT_H28K} ;;
                         h66k)               [[ -f "${SCRIPT_H66K}" ]]            && sudo ./${SCRIPT_H66K} ;;
                         h68k)               [[ -f "${SCRIPT_H68K}" ]]            && sudo ./${SCRIPT_H68K} ;;
-                        h68ktv)             [[ -f "${SCRIPT_H68KTV}" ]]          && sudo ./${SCRIPT_H68KTV} ;;
+                        h68ktv)             [[ -f "${SCRIPT_H68KTV}" ]]          && chmod +x ${SCRIPT_H68KTV} && sudo ./${SCRIPT_H68KTV} ;;
+                        
                         h69k)               [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} ;;
                         h69k-max)           [[ -f "${SCRIPT_H69K}" ]]            && sudo ./${SCRIPT_H69K} "max" ;;
                         h88k)               [[ -f "${SCRIPT_H88K}" ]]            && sudo ./${SCRIPT_H88K} "25" ;;
