@@ -137,59 +137,64 @@ btrfs subvolume create $TGT_ROOT/etc
 extract_rootfs_files
 extract_rockchip_boot_files
 
-# 简洁版本 - 不备份直接替换
-echo "=== 替换设备树文件 ==="
+## 在 mk_rk3568_h68ktv.sh 的合适位置添加以下完整修复代码
 
-CUSTOM_DTB="${PWD}/files/rk3568/h68ktv/rk3568-hlink-h68ktv.dtb"
-TARGET_DTB="${TGT_BOOT}/dtb/rockchip/rk3568-hlink-h68ktv.dtb"
+# 在原 extract_rockchip_boot_files 调用后添加
+echo "=== 开始设备树文件处理 ==="
 
-# 检查源文件
-if [ ! -f "${CUSTOM_DTB}" ]; then
-    echo "❌ 错误：自定义设备树文件不存在"
-    echo "   ${CUSTOM_DTB}"
-    exit 1
+# 1. 首先确保引导分区有 dtb 目录
+DTB_TARGET_BASE="${TGT_BOOT}/dtb"
+mkdir -p "${DTB_TARGET_BASE}"
+
+# 2. 检查并复制板级 dtb 目录
+BOARD_DTB_SOURCE="${PWD}/files/bootfiles/rockchip/rk3568/h68ktv/dtb"
+if [ -d "${BOARD_DTB_SOURCE}" ]; then
+    echo "复制板级设备树文件..."
+    # 复制所有 dtb 文件
+    find "${BOARD_DTB_SOURCE}" -name "*.dtb" -exec cp -f {} "${DTB_TARGET_BASE}/" \;
+    
+    # 复制子目录结构
+    for subdir in "${BOARD_DTB_SOURCE}"/*/; do
+        if [ -d "${subdir}" ]; then
+            dirname=$(basename "${subdir}")
+            mkdir -p "${DTB_TARGET_BASE}/${dirname}"
+            cp -rf "${subdir}"/* "${DTB_TARGET_BASE}/${dirname}/" 2>/dev/null
+        fi
+    done
 fi
 
-echo "📁 自定义设备树: ${CUSTOM_DTB}"
-echo "📊 文件大小: $(stat -c%s "${CUSTOM_DTB}") 字节"
+# 3. 验证设备树文件
+echo "验证设备树文件..."
+DTB_COUNT=$(find "${DTB_TARGET_BASE}" -name "*.dtb" | wc -l)
+if [ "${DTB_COUNT}" -gt 0 ]; then
+    echo "✅ 找到 ${DTB_COUNT} 个设备树文件"
+    find "${DTB_TARGET_BASE}" -name "*.dtb" | head -5
+else
+    echo "❌ 错误：未找到任何设备树文件"
+fi
 
-# 检查目标文件是否存在
-if [ -f "${TARGET_DTB}" ]; then
-    echo "📁 目标设备树: ${TARGET_DTB}"
-    echo "📊 原始大小: $(stat -c%s "${TARGET_DTB}") 字节"
+# 4. 替换自定义设备树文件
+echo "处理自定义设备树文件..."
+CUSTOM_DTB="${PWD}/files/rk3568/h68ktv/rk3568-hlink-h68ktv.dtb"
+if [ -f "${CUSTOM_DTB}" ]; then
+    # 确定目标路径
+    TARGET_DTB_PATH="${DTB_TARGET_BASE}/rockchip/rk3568-hlink-h68ktv.dtb"
+    mkdir -p "$(dirname "${TARGET_DTB_PATH}")"
     
-    # 检查文件差异
-    if cmp -s "${CUSTOM_DTB}" "${TARGET_DTB}"; then
-        echo "✅ 文件相同，无需替换"
+    echo "替换设备树文件: ${TARGET_DTB_PATH}"
+    cp -f "${CUSTOM_DTB}" "${TARGET_DTB_PATH}"
+    
+    if [ -f "${TARGET_DTB_PATH}" ]; then
+        echo "✅ 自定义设备树文件已替换"
+        ls -lh "${TARGET_DTB_PATH}"
     else
-        echo "🔄 文件不同，开始替换..."
-        echo "   🔧 复制中..."
-        cp -f "${CUSTOM_DTB}" "${TARGET_DTB}"
-        
-        if [ $? -eq 0 ]; then
-            echo "   ✅ 替换成功"
-            echo "   📊 新大小: $(stat -c%s "${TARGET_DTB}") 字节"
-        else
-            echo "   ❌ 替换失败"
-        fi
+        echo "❌ 自定义设备树文件替换失败"
     fi
 else
-    echo "⚠️  目标文件不存在，直接复制..."
-    echo "   🔧 复制中..."
-    cp -f "${CUSTOM_DTB}" "${TARGET_DTB}"
-    
-    if [ $? -eq 0 ]; then
-        echo "   ✅ 复制成功"
-        echo "   📊 文件大小: $(stat -c%s "${TARGET_DTB}") 字节"
-    else
-        echo "   ❌ 复制失败"
-    fi
+    echo "⚠️  未找到自定义设备树文件"
 fi
 
-# 设置正确权限
-chmod 644 "${TARGET_DTB}" 2>/dev/null
-
-echo "=== 替换完成 ==="
+echo "=== 设备树文件处理完成 ==="
 
 
 
