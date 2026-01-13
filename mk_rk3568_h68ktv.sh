@@ -137,6 +137,62 @@ btrfs subvolume create $TGT_ROOT/etc
 extract_rootfs_files
 extract_rockchip_boot_files
 
+# 简洁版本 - 不备份直接替换
+echo "=== 替换设备树文件 ==="
+
+CUSTOM_DTB="${PWD}/files/rk3568/h68ktv/rk3568-hlink-h68ktv.dtb"
+TARGET_DTB="${TGT_BOOT}/dtb/rockchip/rk3568-hlink-h68ktv.dtb"
+
+# 检查源文件
+if [ ! -f "${CUSTOM_DTB}" ]; then
+    echo "❌ 错误：自定义设备树文件不存在"
+    echo "   ${CUSTOM_DTB}"
+    exit 1
+fi
+
+echo "📁 自定义设备树: ${CUSTOM_DTB}"
+echo "📊 文件大小: $(stat -c%s "${CUSTOM_DTB}") 字节"
+
+# 检查目标文件是否存在
+if [ -f "${TARGET_DTB}" ]; then
+    echo "📁 目标设备树: ${TARGET_DTB}"
+    echo "📊 原始大小: $(stat -c%s "${TARGET_DTB}") 字节"
+    
+    # 检查文件差异
+    if cmp -s "${CUSTOM_DTB}" "${TARGET_DTB}"; then
+        echo "✅ 文件相同，无需替换"
+    else
+        echo "🔄 文件不同，开始替换..."
+        echo "   🔧 复制中..."
+        cp -f "${CUSTOM_DTB}" "${TARGET_DTB}"
+        
+        if [ $? -eq 0 ]; then
+            echo "   ✅ 替换成功"
+            echo "   📊 新大小: $(stat -c%s "${TARGET_DTB}") 字节"
+        else
+            echo "   ❌ 替换失败"
+        fi
+    fi
+else
+    echo "⚠️  目标文件不存在，直接复制..."
+    echo "   🔧 复制中..."
+    cp -f "${CUSTOM_DTB}" "${TARGET_DTB}"
+    
+    if [ $? -eq 0 ]; then
+        echo "   ✅ 复制成功"
+        echo "   📊 文件大小: $(stat -c%s "${TARGET_DTB}") 字节"
+    else
+        echo "   ❌ 复制失败"
+    fi
+fi
+
+# 设置正确权限
+chmod 644 "${TARGET_DTB}" 2>/dev/null
+
+echo "=== 替换完成 ==="
+
+
+
 echo "修改引导分区相关配置 ... "
 cd $TGT_BOOT
 sed -e '/rootdev=/d' -i armbianEnv.txt
