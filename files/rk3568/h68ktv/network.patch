@@ -59,7 +59,7 @@
 +        option network 'lan'
 +        option mode 'ap'
 +        option key 'password'
-+        option ssid 'H68K_Wireless_5G'
++        option ssid 'H68KTV_Wireless_5G'
 +        option encryption 'psk2'
 +
 +EOF
@@ -91,7 +91,7 @@
 +        option device 'radio0'
 +        option network 'lan'
 +        option mode 'ap'
-+        option ssid 'H68K_Wireless'
++        option ssid 'H68KT_Wireless'
 +        option encryption 'psk2'
 +        option key 'password'
 +

@@ -13,7 +13,7 @@ config wifi-iface 'default_radio0'
         option device 'radio0'
         option network 'lan'
         option mode 'ap'
-        option ssid 'H68K_Wireless'
+        option ssid 'H68KTV_Wireless'
         option encryption 'psk2'
         option key 'password'
 
