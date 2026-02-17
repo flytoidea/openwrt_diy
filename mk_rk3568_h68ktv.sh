@@ -137,6 +137,21 @@ btrfs subvolume create $TGT_ROOT/etc
 extract_rootfs_files
 extract_rockchip_boot_files
 
+
+
+# 添加自定义设备树文件处理
+DTB_DIR="${TGT_BOOT}/dtb/rockchip"
+CUSTOM_DTB="${PWD}/files/rk3568/h68ktv/rk3568-hlink-h68ktv.dtb"
+
+echo "更新设备树文件..."
+# 拷贝自定义设备树文件
+cp -f "${CUSTOM_DTB}" "${DTB_DIR}/" 2>/dev/null && echo "设备树文件已更新" || echo "警告: 设备树文件更新失败"
+
+# 清理其他设备树文件
+find "${DTB_DIR}" -name "*.dtb" ! -name "rk3568-hlink-h68ktv.dtb" -delete 2>/dev/null && echo "无用设备树文件已清理"
+
+
+
 echo "修改引导分区相关配置 ... "
 cd $TGT_BOOT
 sed -e '/rootdev=/d' -i armbianEnv.txt
