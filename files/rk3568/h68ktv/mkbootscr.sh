@@ -1,4 +1,2 @@
 #!/bin/bash
-
-# 自动生成的脚本
-echo "新脚本文件"
+/usr/bin/mkimage -C none -A arm -T script -n 'flatmax load script' -d ../../bootfiles/rockchip/rk3568/h68ktv/boot.cmd ../../bootfiles/rockchip/rk3568/h68ktv/boot.scr
