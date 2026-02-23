@@ -60,8 +60,8 @@ KERNEL_REPO_URL_VALUE="breakingbadboy/OpenWrt"
 # Set kernel tag: kernel_stable, kernel_rk3588, kernel_rk35xx
 KERNEL_TAGS=("stable" "rk3588" "rk35xx")
 STABLE_KERNEL=("6.1.y" "6.12.y")
-RK3588_KERNEL=("6.1.y")
-RK35XX_KERNEL=("6.1.y")
+RK3588_KERNEL=("6.1.y" "6.12.y")
+RK35XX_KERNEL=("6.1.y" "6.12.y")
 # The kernel_flippy provided by flippy in ophub/kernel repository: https://github.com/ophub/kernel/releases
 FLIPPY_KERNEL=(${STABLE_KERNEL[@]})
 # Set to automatically query the latest kernel version
@@ -252,7 +252,14 @@ init_var() {
 
     # Remove duplicate package drivers
     PACKAGE_OPENWRT=($(echo "${PACKAGE_OPENWRT[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-
+	if [[ -n "${RK35XX_KERNEL}" ]]; then
+		oldIFS="${IFS}"
+		IFS="_"
+		RK35XX_KERNEL=(${RK35XX_KERNEL})
+		IFS="${oldIFS}"
+	else
+		RK35XX_KERNEL=("6.1.y" "6.12.y")
+	fi	
     # Convert kernel library address to api format
     echo -e "${INFO} Kernel download repository: [ ${KERNEL_REPO_URL} ]"
     [[ "${KERNEL_REPO_URL}" =~ ^https: ]] && KERNEL_REPO_URL="$(echo ${KERNEL_REPO_URL} | awk -F'/' '{print $4"/"$5}')"
@@ -401,7 +408,8 @@ query_kernel() {
                 latest_version="$(
                     curl -fsSL \
                         ${kernel_api}/releases/expanded_assets/kernel_${vb} |
-                        grep -oP "${kernel_verpatch}\.[0-9]+.*(?=\.tar\.gz)" |
+                        grep -oP "${kernel_verpatch}\.[0-9]+[^\"\']*(?=\.tar\.gz)" |
+						sed 's/.*deb-//' |
                         sort -urV | head -n 1
                 )"
 
@@ -459,10 +467,20 @@ download_kernel() {
 
     cd /opt
 
+    # 辅助函数：通过 GitHub API 获取内核包的真实文件名
+    get_kernel_filename() {
+        local tag="$1"
+        local version="$2"
+        local api_url="https://api.github.com/repos/${KERNEL_REPO_URL}/releases/tags/kernel_${tag}"
+        # 查询该 release 下所有 .tar.gz 资源，筛选出包含版本号（如 6.12.74）的文件名
+        curl -fsSL "${api_url}" | jq -r --arg ver "$version" \
+            '.assets[] | select(.name | contains($ver) and endswith(".tar.gz")) | .name' | head -n1
+    }
+
     x="1"
     for vb in "${KERNEL_TAGS[@]}"; do
         {
-            # Set the kernel download list
+            # 设置该标签对应的内核版本列表
             if [[ "${vb,,}" == "rk3588" ]]; then
                 down_kernel_list=(${RK3588_KERNEL[@]})
             elif [[ "${vb,,}" == "rk35xx" ]]; then
@@ -473,35 +491,41 @@ download_kernel() {
                 down_kernel_list=(${STABLE_KERNEL[@]})
             fi
 
-            # Kernel storage directory
+            # 内核存储目录
             kernel_path="kernel/${vb}"
             [[ -d "${kernel_path}" ]] || mkdir -p ${kernel_path}
 
-            # Download the kernel to the storage directory
             i="1"
             for kernel_var in "${down_kernel_list[@]}"; do
+                # 如果内核已存在本地，跳过下载
                 if [[ ! -d "${kernel_path}/${kernel_var}" ]]; then
-                    kernel_down_from="https://github.com/${KERNEL_REPO_URL}/releases/download/kernel_${vb}/${kernel_var}.tar.gz"
-                    echo -e "${INFO} (${x}.${i}) [ ${vb} - ${kernel_var} ] Kernel download from [ ${kernel_down_from} ]"
+                    # 获取该版本对应的真实文件名（例如 deb-6.12.74.tar.gz）
+                    real_filename=$(get_kernel_filename "${vb}" "${kernel_var}")
+                    if [[ -z "${real_filename}" ]]; then
+                        echo -e "${ERROR} (${x}.${i}) [ ${vb} - ${kernel_var} ] No matching kernel file found in release."
+                        exit 1
+                    fi
+                    kernel_down_from="https://github.com/${KERNEL_REPO_URL}/releases/download/kernel_${vb}/${real_filename}"
+                    echo -e "${INFO} (${x}.${i}) [ ${vb} - ${kernel_var} ] Downloading kernel from: ${kernel_down_from}"
 
-                    # Download the kernel file. If the download fails, try again 10 times.
+                    # 下载内核文件，保存为 ${kernel_var}.tar.gz（保持原解压逻辑不变）
                     download_retry "${kernel_down_from}" "${kernel_path}/${kernel_var}.tar.gz"
                     [[ "${?}" -eq "0" ]] || error_msg "Failed to download the kernel files from the server."
 
-                    # Decompress the kernel file
+                    # 解压内核文件
                     tar -mxf "${kernel_path}/${kernel_var}.tar.gz" -C "${kernel_path}"
                     [[ "${?}" -eq "0" ]] || error_msg "[ ${kernel_var} ] kernel decompression failed."
                 else
-                    echo -e "${INFO} (${x}.${i}) [ ${vb} - ${kernel_var} ] Kernel is in the local directory."
+                    echo -e "${INFO} (${x}.${i}) [ ${vb} - ${kernel_var} ] Kernel already exists in local directory."
                 fi
 
-                # If the kernel contains the sha256sums file, check the files integrity
+                # 如果内核包含 sha256sums 文件，进行完整性校验
                 [[ -f "${kernel_path}/${kernel_var}/sha256sums" ]] && check_kernel "${kernel_path}/${kernel_var}"
 
                 ((i++))
             done
 
-            # Delete downloaded kernel temporary files
+            # 删除下载的临时压缩包
             rm -f ${kernel_path}/*.tar.gz
             sync
 
