@@ -252,14 +252,7 @@ init_var() {
 
     # Remove duplicate package drivers
     PACKAGE_OPENWRT=($(echo "${PACKAGE_OPENWRT[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-	if [[ -n "${RK35XX_KERNEL}" ]]; then
-		oldIFS="${IFS}"
-		IFS="_"
-		RK35XX_KERNEL=(${RK35XX_KERNEL})
-		IFS="${oldIFS}"
-	else
-		RK35XX_KERNEL=("6.1.y" "6.12.y")
-	fi	
+	
     # Convert kernel library address to api format
     echo -e "${INFO} Kernel download repository: [ ${KERNEL_REPO_URL} ]"
     [[ "${KERNEL_REPO_URL}" =~ ^https: ]] && KERNEL_REPO_URL="$(echo ${KERNEL_REPO_URL} | awk -F'/' '{print $4"/"$5}')"
