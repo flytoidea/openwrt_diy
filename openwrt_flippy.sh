@@ -60,8 +60,8 @@ KERNEL_REPO_URL_VALUE="breakingbadboy/OpenWrt"
 # Set kernel tag: kernel_stable, kernel_rk3588, kernel_rk35xx
 KERNEL_TAGS=("stable" "rk3588" "rk35xx")
 STABLE_KERNEL=("6.1.y" "6.12.y")
-RK3588_KERNEL=("6.1.y" "6.12.y")
-RK35XX_KERNEL=("6.1.y" "6.12.y")
+RK3588_KERNEL=("6.1.y")
+RK35XX_KERNEL=("6.12.y")
 # The kernel_flippy provided by flippy in ophub/kernel repository: https://github.com/ophub/kernel/releases
 FLIPPY_KERNEL=(${STABLE_KERNEL[@]})
 # Set to automatically query the latest kernel version
@@ -373,11 +373,9 @@ init_packit_repo() {
 query_kernel() {
     echo -e "${STEPS} Start querying the latest kernel..."
 
-    # Check the version on the kernel library
     x="1"
     for vb in "${KERNEL_TAGS[@]}"; do
         {
-            # Select the corresponding kernel directory and list
             if [[ "${vb,,}" == "rk3588" ]]; then
                 down_kernel_list=(${RK3588_KERNEL[@]})
             elif [[ "${vb,,}" == "rk35xx" ]]; then
@@ -388,48 +386,42 @@ query_kernel() {
                 down_kernel_list=(${STABLE_KERNEL[@]})
             fi
 
-            # Query the name of the latest kernel version
             TMP_ARR_KERNELS=()
             i=1
             for kernel_var in "${down_kernel_list[@]}"; do
                 echo -e "${INFO} (${i}) Auto query the latest kernel version of the same series for [ ${vb} - ${kernel_var} ]"
 
-                # Identify the kernel <VERSION> and <PATCHLEVEL>, such as [ 6.1 ]
                 kernel_verpatch="$(echo ${kernel_var} | awk -F '.' '{print $1"."$2}')"
 
-                # Query the latest kernel version
-                latest_version="$(
-                    curl -fsSL \
-                        ${kernel_api}/releases/expanded_assets/kernel_${vb} |
-                        grep -oP "${kernel_verpatch}\.[0-9]+[^\"\']*(?=\.tar\.gz)" |
-						sed 's/.*deb-//' |
-                        sort -urV | head -n 1
-                )"
+                # 使用 GitHub API 获取该标签下的所有 assets，提取包含主版本号的具体版本
+                assets_json=$(curl -fsSL "https://api.github.com/repos/${KERNEL_REPO_URL}/releases/tags/kernel_${vb}" 2>/dev/null)
+                if [[ -n "${assets_json}" ]]; then
+                    latest_version=$(echo "${assets_json}" | jq -r --arg ver "${kernel_verpatch}" '
+                        .assets[] | select(.name | contains("\($ver).") and endswith(".tar.gz")) | .name
+                    ' | sed -n 's/.*\([0-9]\+\.[0-9]\+\.[0-9]\+\)\.tar\.gz$/\1/p' | sort -urV | head -n1)
+                else
+                    latest_version=""
+                fi
 
-                if [[ "$?" -eq "0" && -n "${latest_version}" ]]; then
+                if [[ -n "${latest_version}" ]]; then
                     TMP_ARR_KERNELS[${i}]="${latest_version}"
                 else
-                    TMP_ARR_KERNELS[${i}]="${kernel_var}"
+                    TMP_ARR_KERNELS[${i}]="${kernel_var}"   # 保留原占位符（但理论上不应发生）
                 fi
 
                 echo -e "${INFO} (${i}) [ ${vb} - ${TMP_ARR_KERNELS[$i]} ] is latest kernel."
-
                 ((i++))
             done
 
-            # Reset the kernel array to the latest kernel version
+            # 更新对应的内核数组
             if [[ "${vb,,}" == "rk3588" ]]; then
                 RK3588_KERNEL=(${TMP_ARR_KERNELS[@]})
-                echo -e "${INFO} The latest version of the rk3588 kernel: [ ${RK3588_KERNEL[@]} ]"
             elif [[ "${vb,,}" == "rk35xx" ]]; then
                 RK35XX_KERNEL=(${TMP_ARR_KERNELS[@]})
-                echo -e "${INFO} The latest version of the rk35xx kernel: [ ${RK35XX_KERNEL[@]} ]"
             elif [[ "${vb,,}" == "flippy" ]]; then
                 FLIPPY_KERNEL=(${TMP_ARR_KERNELS[@]})
-                echo -e "${INFO} The latest version of the flippy kernel: [ ${FLIPPY_KERNEL[@]} ]"
             else
                 STABLE_KERNEL=(${TMP_ARR_KERNELS[@]})
-                echo -e "${INFO} The latest version of the stable kernel: [ ${STABLE_KERNEL[@]} ]"
             fi
 
             ((x++))
@@ -465,9 +457,7 @@ download_kernel() {
         local tag="$1"
         local version="$2"
         local api_url="https://api.github.com/repos/${KERNEL_REPO_URL}/releases/tags/kernel_${tag}"
-        # 查询该 release 下所有 .tar.gz 资源，筛选出包含版本号（如 6.12.74）的文件名
-        curl -fsSL "${api_url}" | jq -r --arg ver "$version" \
-            '.assets[] | select(.name | contains($ver) and endswith(".tar.gz")) | .name' | head -n1
+        curl -fsSL "${api_url}" | jq -r '.assets[] | select(.name | contains("'"${version}"'") and endswith(".tar.gz")) | .name' | head -n1
     }
 
     x="1"
