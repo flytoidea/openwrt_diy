@@ -238,6 +238,7 @@ jobs:
           CUSTOMIZE_RK3399: ${{ inputs.customize_rk3399 }}
           SCRIPT_DIY_PATH: ${{ inputs.script_diy_path }}
           WHOAMI: ${{ inputs.builder_name }}
+          RK35XX_KERNEL: "6.1.y_6.12.y"
 
       - name: Upload OpenWrt Firmware to Release
         uses: ncipollo/release-action@main
