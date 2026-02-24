@@ -26,7 +26,7 @@ SCRIPT_REPO_BRANCH_VALUE="master"
 # Set the *rootfs.tar.gz package save name
 PACKAGE_FILE="openwrt-armsr-armv8-generic-rootfs.tar.gz"
 # Set the working directory under /opt
-SELECT_PACKITPATH_VALUE="openwrt_packit"
+SELECT_PACKITPATH_VALUE="openwrt_diy"
 SELECT_OUTPUTPATH_VALUE="output"
 GZIP_IMGS_VALUE="auto"
 SAVE_OPENWRT_ROOTFS_VALUE="true"
@@ -61,7 +61,7 @@ KERNEL_REPO_URL_VALUE="breakingbadboy/OpenWrt"
 KERNEL_TAGS=("stable" "rk3588" "rk35xx")
 STABLE_KERNEL=("6.1.y" "6.12.y")
 RK3588_KERNEL=("6.1.y")
-RK35XX_KERNEL=("6.1.y")
+RK35XX_KERNEL=("6.1.y" "6.12.y")
 # The kernel_flippy provided by flippy in ophub/kernel repository: https://github.com/ophub/kernel/releases
 FLIPPY_KERNEL=(${STABLE_KERNEL[@]})
 # Set to automatically query the latest kernel version
