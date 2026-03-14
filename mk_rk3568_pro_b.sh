@@ -141,14 +141,14 @@ extract_rockchip_boot_files
 
 # 添加自定义设备树文件处理
 DTB_DIR="${TGT_BOOT}/dtb/rockchip"
-CUSTOM_DTB="${PWD}/files/rk3568/pro-b/rk3568-pro-b.dtb"
+CUSTOM_DTB="${PWD}/files/rk3568/pro-rk3568-b/pro-rk3568-b.dtb"
 
 #echo "更新设备树文件..."
 # 拷贝自定义设备树文件
 cp -f "${CUSTOM_DTB}" "${DTB_DIR}/" 2>/dev/null && echo "设备树文件已更新" || echo "警告: 设备树文件更新失败"
 
 # 清理其他设备树文件
-#find "${DTB_DIR}" -name "*.dtb" ! -name "rk3568-pro-b.dtb" -delete 2>/dev/null && echo "无用设备树文件已清理"
+#find "${DTB_DIR}" -name "*.dtb" ! -name "pro-rk3568-b.dtb" -delete 2>/dev/null && echo "无用设备树文件已清理"
 
 
 
