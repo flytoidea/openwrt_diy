@@ -40,6 +40,7 @@ on:
           - jp-tvbox
           - l1pro
           - photonicat
+          - pro-rk3568-b
           - qemu
           - r66s
           - r68s
