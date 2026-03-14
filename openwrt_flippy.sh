@@ -36,7 +36,7 @@ PACKAGE_OPENWRT=(
     "ak88" "e52c" "e54c" "h88k" "h88k-v3" "rock5b" "rock5c"
     "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h68ktv" "h69k" "h69k-max" "ht2"
     "jp-tvbox" "watermelon-pi" "yixun-rs6pro" "zcube1-max"
-    "cm3" "e25" "photonicat" "r66s" "r68s" "rk3399"
+    "cm3" "e25" "photonicat" "pro-rk3568-b" "r66s" "r68s" "rk3399"
     "s922x" "s922x-n2" "s905x3" "s905x2" "s912" "s905d" "s905"
     "beikeyun" "l1pro"
     "vplus"
@@ -48,7 +48,7 @@ PACKAGE_OPENWRT_RK3588=("ak88" "e52c" "e54c" "h88k" "h88k-v3" "rock5b" "rock5c")
 # Set the list of devices using the [ rk35xx ] kernel
 PACKAGE_OPENWRT_RK35XX=(
     "100ask-dshanpi-a1" "e20c" "e24c" "h28k" "h66k" "h68k" "h68ktv" "h69k" "h69k-max" "ht2"
-    "jp-tvbox" "watermelon-pi" "yixun-rs6pro" "zcube1-max"
+    "jp-tvbox" "pro-rk3568-b" "watermelon-pi" "yixun-rs6pro" "zcube1-max"
 )
 # Set the list of devices using the [ 6.x.y ] kernel
 PACKAGE_OPENWRT_6XY=("cm3" "e25" "photonicat" "r66s" "r68s" "rk3399")
@@ -92,6 +92,7 @@ SCRIPT_HT2_FILE="mk_rk3528_ht2.sh"
 SCRIPT_JPTVBOX_FILE="mk_rk3566_jp-tvbox.sh"
 SCRIPT_L1PRO_FILE="mk_rk3328_l1pro.sh"
 SCRIPT_PHOTONICAT_FILE="mk_rk3568_photonicat.sh"
+SCRIPT_PHOTONICAT_FILE="mk_rk3568_pro_b"
 SCRIPT_QEMU_FILE="mk_qemu-aarch64_img.sh"
 SCRIPT_R66S_FILE="mk_rk3568_r66s.sh"
 SCRIPT_R68S_FILE="mk_rk3568_r68s.sh"
@@ -188,6 +189,7 @@ init_var() {
     SCRIPT_JPTVBOX="${SCRIPT_JPTVBOX:-${SCRIPT_JPTVBOX_FILE}}"
     SCRIPT_L1PRO="${SCRIPT_L1PRO:-${SCRIPT_L1PRO_FILE}}"
     SCRIPT_PHOTONICAT="${SCRIPT_PHOTONICAT:-${SCRIPT_PHOTONICAT_FILE}}"
+    SCRIPT_PRO_RK3568_B="${SCRIPT_PRO_RK3568_B:-${SCRIPT_PRO_RK3568_B_FILE}}"
     SCRIPT_QEMU="${SCRIPT_QEMU:-${SCRIPT_QEMU_FILE}}"
     SCRIPT_R66S="${SCRIPT_R66S:-${SCRIPT_R66S_FILE}}"
     SCRIPT_R68S="${SCRIPT_R68S:-${SCRIPT_R68S_FILE}}"
@@ -618,6 +620,7 @@ EOF
                         jp-tvbox)           [[ -f "${SCRIPT_JPTVBOX}" ]]         && sudo ./${SCRIPT_JPTVBOX} ;;
                         l1pro)              [[ -f "${SCRIPT_L1PRO}" ]]           && sudo ./${SCRIPT_L1PRO} ;;
                         photonicat)         [[ -f "${SCRIPT_PHOTONICAT}" ]]      && sudo ./${SCRIPT_PHOTONICAT} ;;
+                        pro-rk3568-b)       [[ -f "${SCRIPT_PRO_RK3568_B}" ]]    && sudo ./${SCRIPT_PRO_RK3568_B} ;;
                         qemu)               [[ -f "${SCRIPT_QEMU}" ]]            && sudo ./${SCRIPT_QEMU} ;;
                         r66s)               [[ -f "${SCRIPT_R66S}" ]]            && sudo ./${SCRIPT_R66S} ;;
                         r68s)               [[ -f "${SCRIPT_R68S}" ]]            && sudo ./${SCRIPT_R68S} ;;
