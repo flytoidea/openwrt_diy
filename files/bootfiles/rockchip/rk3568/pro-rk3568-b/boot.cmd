@@ -5,8 +5,7 @@
 
 setenv load_addr "0x39000000"
 setenv overlay_error "false"
-
-# default values (used only if not defined in armbianEnv.txt)
+# default values
 setenv rootdev "/dev/mmcblk0p1"
 setenv verbosity "1"
 setenv console "both"
@@ -15,65 +14,32 @@ setenv rootfstype "ext4"
 setenv rootflags "rw,errors=remount-ro"
 setenv docker_optimizations "on"
 setenv earlycon "off"
-setenv consoleargs ""
-setenv earlyconargs ""
-setenv usbstoragequirks ""
-setenv extraargs ""
-setenv extraboardargs ""
 
 echo "Boot script loaded from ${devtype} ${devnum}"
 
-# Load and import armbianEnv.txt (overrides default values)
 if test -e ${devtype} ${devnum} ${prefix}armbianEnv.txt; then
 	load ${devtype} ${devnum} ${load_addr} ${prefix}armbianEnv.txt
 	env import -t ${load_addr} ${filesize}
 fi
 
-# --- 修正点：控制台参数处理 ---
-# 如果 armbianEnv.txt 中定义了 consoleargs，直接使用它
-if test -n "${consoleargs}"; then
-	# 用户已自定义完整的 consoleargs（如 "console=ttyFIQ0,1500000"）
-	setenv final_consoleargs "${consoleargs}"
-else
-	# 否则根据 console 变量构造（兼容旧方式）
-	setenv final_consoleargs ""
-	if test "${console}" = "display" || test "${console}" = "both"; then
-		setenv final_consoleargs "console=tty1"
-	fi
-	if test "${console}" = "serial" || test "${console}" = "both"; then
-		# 默认串口设备，请根据你的平台修改（ttyFIQ0 或 ttyS2 等）
-		setenv final_consoleargs "${final_consoleargs} console=ttyFIQ0,1500000"
-	fi
-fi
+if test "${logo}" = "disabled"; then setenv logo "logo.nologo"; fi
 
-# 处理 earlycon（如果启用且定义了 earlyconargs）
-if test "${earlycon}" = "on" && test -n "${earlyconargs}"; then
-	setenv final_consoleargs "${earlyconargs} ${final_consoleargs}"
-fi
+if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=tty1"; fi
+if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=tty1"; fi
+if test "${earlycon}" = "on"; then setenv consoleargs "${earlyconargs} ${consoleargs}"; fi
+if test "${bootlogo}" = "true"; then setenv consoleargs "bootsplash.bootfile=bootsplash.armbian ${consoleargs}"; fi
 
-# 处理 bootlogo
-if test "${bootlogo}" = "true"; then
-	setenv final_consoleargs "bootsplash.bootfile=bootsplash.armbian ${final_consoleargs}"
-fi
-# --- 控制台参数处理结束 ---
-
-# 获取第一个分区的 PARTUUID（备用，但当前我们直接用 rootdev）
+# get PARTUUID of first partition on SD/eMMC the boot script was loaded from
 if test "${devtype}" = "mmc"; then part uuid mmc ${devnum}:1 partuuid; fi
 
-# 构造最终的 bootargs
-setenv bootargs "root=${rootdev} rootwait rootfstype=${rootfstype} rootflags=${rootflags} ${final_consoleargs} consoleblank=0 loglevel=${verbosity} usb-storage.quirks=${usbstoragequirks} ${extraargs} ${extraboardargs}"
+setenv bootargs "root=${rootdev} rootwait rootfstype=${rootfstype} rootflags=${rootflags} ${consoleargs} consoleblank=0 loglevel=${verbosity} usb-storage.quirks=${usbstoragequirks} ${extraargs} ${extraboardargs}"
 
-# Docker 优化参数
-if test "${docker_optimizations}" = "on"; then
-	setenv bootargs "${bootargs} cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1"
-fi
+if test "${docker_optimizations}" = "on"; then setenv bootargs "${bootargs} cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1"; fi
 
-# 加载 initrd、kernel 和 dtb
 load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd
 load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}Image
-load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 
-# 应用设备树覆盖（overlays）
+load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 fdt addr ${fdt_addr_r}
 fdt resize 65536
 for overlay_file in ${overlays}; do
@@ -88,8 +54,6 @@ for overlay_file in ${user_overlays}; do
 		fdt apply ${load_addr} || setenv overlay_error "true"
 	fi
 done
-
-# 错误处理及 fixup 脚本
 if test "${overlay_error}" = "true"; then
 	echo "Error applying DT overlays, restoring original DT"
 	load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
@@ -104,6 +68,7 @@ else
 		source ${load_addr}
 	fi
 fi
-
-# 启动内核
 booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
+
+# Recompile with:
+# mkimage -C none -A arm -T script -n 'flatmax load script' -d /boot/boot.cmd /boot/boot.scr
